@@ -1,5 +1,37 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    TODO
+
+<!-- Show new post div if user is logged in -->
+  {% if user.is_authenticated %}
+    <div id="createPostView">
+      <form id="postForm">
+        <div class="form-group">
+          <label for="exampleFormControlTextarea1">New Post</label>
+          <textarea class="form-control" id="postText" rows="5"></textarea>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary" id="submitPost">Submit</button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    <div id="allPostsView">
+      <h1>All Posts</h1>
+    </div>
+    <div id="followingView">
+      <h1>Following</h1>
+    </div>
+    <div id="profileView">
+      <h1>Profile View</h1>
+    </div>
+  {% endif %}
+
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
 {% endblock %}

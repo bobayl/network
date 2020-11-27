@@ -1,14 +1,47 @@
+import json
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
-from .models import User
+from .models import User, Post, Comment
 
+def entry(request):
+    return render(request, "network/entry.html")
 
 def index(request):
     return render(request, "network/index.html")
+
+@csrf_exempt
+@login_required
+def create_post(request):
+    # Posting must be via POST request
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    data = json.loads(request.body)
+    content = data.get("content")
+    newPost = Post(content = content, author = request.user)
+    newPost.save()
+    return render(request, "network/index.html")
+
+# The home page: Shows all posts. No need to be logged in.
+def all_posts(request):
+    posts = Post.objects.all()
+    posts = [post.serialize() for post in posts]
+    #print(f"posts: {posts}")
+    return JsonResponse(posts, safe=False)
+
+@login_required
+def posts(request, postSet):
+    # Filter posts depending on which posts to show.
+    # These post sets are only available if logged in.
+    # TODO
+    return True
 
 
 def login_view(request):
@@ -33,7 +66,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("entry"))
 
 
 def register(request):

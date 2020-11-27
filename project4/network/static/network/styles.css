@@ -1,0 +1,37 @@
+h1 {
+  margin-left: 10px;
+}
+h2 {
+  text-align: center;
+  color: #8BA6E9;
+}
+h6 {
+  text-align: center;
+  color: #BED0F4;
+}
+
+#welcomeTitle {
+  text-align: center;
+  margin-top: 50px;
+  color: #7E96C4;
+}
+
+#createPostView, #postContainer{
+  max-width: 800px;
+  border-style: solid;
+  border-width: thin;
+  border-color: lightgrey;
+  border-radius: 3px;
+  padding: 10px;
+  margin: 10px;
+  margin-right: 10px;
+}
+
+#postAuthor {
+  font-weight: bold;
+}
+#postTimestamp {
+  color: grey;
+  font-size: small;
+  font-style: italic;
+}
