@@ -1,22 +1,40 @@
 document.addEventListener('DOMContentLoaded', function() {
+  // Get the current user:
+  const currentUser = document.querySelector('#currentUser').innerHTML;
 
   // Use Nav-Bar-Links to toggle between sites:
-  document.querySelector('#userPage').addEventListener('click', () => load_posts('userPosts'));
+  document.querySelector('#userPage').addEventListener('click', () => show_user(currentUser));
   document.querySelector('#allPosts').addEventListener('click', () => load_posts('all'));
-  document.querySelector('#following').addEventListener('click', () => load_all_posts('following'));
+  document.querySelector('#following').addEventListener('click', () => load_posts('following'));
   // Load the New Post section
   create_post();
-  load_all_posts();
+  load_posts('all');
 });
 
-function load_posts(postSet) {
-  // Show compose view and hide other views.
-  // This doesn't work yet...
-  document.querySelector('#allPostsView').style.display = 'block';
-  document.querySelector('#followingView').style.display = 'none';
-  document.querySelector('#profileView').style.display = 'none';
+function show_user(username) {
+  document.querySelector('#createPostView').style.display = 'none';
+  document.querySelector('#userView').style.display = 'block';
+  document.querySelector('#postsView').style.display = 'block';
 
-  let route = '/all_posts';
+  let route = `/userPage/${username}`;
+  console.log(route);
+  // This fetch returns the user data:
+  fetch(route)
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    document.querySelector('#userView').innerHTML = "";
+    var profileTitle = document.createElement('h1');
+    profileTitle.innerHTML = "User: " + data.username;
+    document.querySelector('#userView').append(profileTitle);
+  })
+
+  load_posts(username);
+}
+
+function load_posts(user) {
+  // Show compose view and hide other views.
+  let route = `/posts/${user}`;
   fetch(route)
   .then(response => response.json())
   .then(posts => {
@@ -26,8 +44,14 @@ function load_posts(postSet) {
 }
 
 function list(posts) {
+  document.querySelector('#postsView').innerHTML = "";
+  var title = document.createElement('h1');
+  title.innerHTML = "Posts";
+  document.querySelector('#postsView').append(title);
+
   var post;
   for (post of posts) {
+    const postAuthor = post.author;
     // Create a container for each post:
     var postContainer = document.createElement('div');
     postContainer.id = 'postContainer';
@@ -35,6 +59,17 @@ function list(posts) {
     var author = document.createElement('div');
     author.id = 'postAuthor';
     author.innerHTML = post.author;
+    author.onmouseover = function() {
+      this.style = "color: lightblue;"
+      console.log(postAuthor);
+    }
+    author.onmouseout = function() {
+      this.style = "color: #7E96C4;"
+    }
+    author.onclick = function() {
+      console.log(postAuthor);
+      show_user(postAuthor);
+    }
     var content = document.createElement('div');
     content.id = 'postContent';
     content.innerHTML = post.content;
@@ -45,12 +80,14 @@ function list(posts) {
     likes.id = 'postLikes';
     likes.innerHTML = "&#128154; " + post.likes;
 
+
+
     postContainer.appendChild(author);
     postContainer.appendChild(content);
     postContainer.appendChild(timestamp);
     postContainer.appendChild(likes);
 
-    document.querySelector('#allPostsView').append(postContainer);
+    document.querySelector('#postsView').append(postContainer);
   }
 }
 

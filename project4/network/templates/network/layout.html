@@ -28,7 +28,7 @@
                       <a class="nav-link" id="allPosts" href="{% url 'index' %}">All Posts</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="userPage" href="#"><strong>{{ user.username }}</strong></a>
+                        <a class="nav-link" id="userPage" href="#"><strong><span id="currentUser">{{ user.username }}</span></strong></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="following" href="#">Following</a>

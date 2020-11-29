@@ -30,18 +30,26 @@ def create_post(request):
     return render(request, "network/index.html")
 
 # The home page: Shows all posts. No need to be logged in.
-def all_posts(request):
-    posts = Post.objects.all()
+
+@login_required
+def posts(request, user):
+    # Filter posts depending on which posts to show.
+    if user == "all":
+        posts = Post.objects.all()
+    else:
+        author = User.objects.get(username = user)
+        posts = Post.objects.filter(author = author)
+    posts = posts.order_by("-timestamp").all()
     posts = [post.serialize() for post in posts]
-    #print(f"posts: {posts}")
     return JsonResponse(posts, safe=False)
 
 @login_required
-def posts(request, postSet):
-    # Filter posts depending on which posts to show.
-    # These post sets are only available if logged in.
-    # TODO
-    return True
+def userPage(request, username):
+    user = User.objects.get(username = username)
+    print(user)
+    user = user.serialize()
+    print(user)
+    return JsonResponse(user, safe=False)
 
 
 def login_view(request):

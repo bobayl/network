@@ -3,11 +3,11 @@ h1 {
 }
 h2 {
   text-align: center;
-  color: #8BA6E9;
+  color: lightgrey;
 }
 h6 {
   text-align: center;
-  color: #BED0F4;
+  color: lightblue;
 }
 
 #welcomeTitle {
@@ -29,6 +29,7 @@ h6 {
 
 #postAuthor {
   font-weight: bold;
+  color: #7E96C4;
 }
 #postTimestamp {
   color: grey;

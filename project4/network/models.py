@@ -6,6 +6,11 @@ import datetime
 
 class User(AbstractUser):
     pass
+    def serialize(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email}
 
 class Post(models.Model):
     content = models.CharField(max_length = 1000)
@@ -36,5 +41,14 @@ class Comment(models.Model):
         return f"Comment by {self.commenter} on post {self.post.id}"
 
 class Follower(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE, related_name = "followedUser")
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
     follower = models.ManyToManyField(User, related_name = "followers")
+    following = models.ManyToManyField(User, related_name = "following")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user": self.username,
+            "follower": [user.username for user in self.follower.all()],
+            "following": [user.username for user in self.following.all()]
+        }
