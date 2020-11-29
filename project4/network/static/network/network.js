@@ -1,3 +1,4 @@
+// Load the DOM and attach the event listeners to the menu items:
 document.addEventListener('DOMContentLoaded', function() {
   // Get the current user:
   const currentUser = document.querySelector('#currentUser').innerHTML;
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   load_posts('all');
 });
 
+// Shows the user profile followed by all posts of that user:
 function show_user(username) {
   document.querySelector('#createPostView').style.display = 'none';
   document.querySelector('#userView').style.display = 'block';
@@ -32,65 +34,76 @@ function show_user(username) {
   load_posts(username);
 }
 
+// Loads the post for a user (user can also be "all". Then all posts are shown)
 function load_posts(user) {
+  const currentUser = document.querySelector('#currentUser').innerHTML;
   // Show compose view and hide other views.
   let route = `/posts/${user}`;
   fetch(route)
   .then(response => response.json())
   .then(posts => {
     //console.log(posts);
-    list(posts);
+    document.querySelector('#postsView').innerHTML = "";
+    var title = document.createElement('h1');
+    title.innerHTML = "Posts";
+    document.querySelector('#postsView').append(title);
+
+    var post;
+    for (post of posts) {
+      const postAuthor = post.author;
+      // Create a container for each post:
+      var postContainer = document.createElement('div');
+      postContainer.id = 'postContainer';
+
+      var author = document.createElement('div');
+      author.id = 'postAuthor';
+      author.innerHTML = post.author;
+      author.onmouseover = function() {
+        this.style = "color: lightblue;"
+        console.log(postAuthor);
+      }
+      author.onmouseout = function() {
+        this.style = "color: #7E96C4;"
+      }
+      author.onclick = function() {
+        console.log(postAuthor);
+        show_user(postAuthor);
+      }
+
+      var content = document.createElement('div');
+      content.id = 'postContent';
+      content.innerHTML = post.content;
+      var timestamp = document.createElement('div');
+      timestamp.id = 'postTimestamp';
+      timestamp.innerHTML = post.timestamp;
+      var likes = document.createElement('div');
+      likes.id = 'postLikes';
+      likes.innerHTML = "&#128154; " + post.likes;
+
+      postContainer.appendChild(author);
+      postContainer.appendChild(content);
+      postContainer.appendChild(timestamp);
+      postContainer.appendChild(likes);
+
+      // Create the follow button:
+      if (postAuthor != currentUser) {
+        const followButton = document.createElement('button');
+        followButton.className = "btn btn-info";
+        followButton.type = "button";
+        followButton.innerHTML = "Follow " + postAuthor;
+        followButton.id = "followButton";
+        followButton.onclick = function() {
+          // // TODO:
+        }
+        postContainer.appendChild(followButton);
+      }
+
+      document.querySelector('#postsView').append(postContainer);
+    }
   })
 }
 
-function list(posts) {
-  document.querySelector('#postsView').innerHTML = "";
-  var title = document.createElement('h1');
-  title.innerHTML = "Posts";
-  document.querySelector('#postsView').append(title);
-
-  var post;
-  for (post of posts) {
-    const postAuthor = post.author;
-    // Create a container for each post:
-    var postContainer = document.createElement('div');
-    postContainer.id = 'postContainer';
-
-    var author = document.createElement('div');
-    author.id = 'postAuthor';
-    author.innerHTML = post.author;
-    author.onmouseover = function() {
-      this.style = "color: lightblue;"
-      console.log(postAuthor);
-    }
-    author.onmouseout = function() {
-      this.style = "color: #7E96C4;"
-    }
-    author.onclick = function() {
-      console.log(postAuthor);
-      show_user(postAuthor);
-    }
-    var content = document.createElement('div');
-    content.id = 'postContent';
-    content.innerHTML = post.content;
-    var timestamp = document.createElement('div');
-    timestamp.id = 'postTimestamp';
-    timestamp.innerHTML = post.timestamp;
-    var likes = document.createElement('div');
-    likes.id = 'postLikes';
-    likes.innerHTML = "&#128154; " + post.likes;
-
-
-
-    postContainer.appendChild(author);
-    postContainer.appendChild(content);
-    postContainer.appendChild(timestamp);
-    postContainer.appendChild(likes);
-
-    document.querySelector('#postsView').append(postContainer);
-  }
-}
-
+// Create a new post:
 function create_post() {
   // Clear compose text area.
   document.querySelector('#postText').value = '';

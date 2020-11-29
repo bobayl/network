@@ -51,6 +51,10 @@ def userPage(request, username):
     print(user)
     return JsonResponse(user, safe=False)
 
+@login_required
+def follow(request, follow):
+    return True
+
 
 def login_view(request):
     if request.method == "POST":

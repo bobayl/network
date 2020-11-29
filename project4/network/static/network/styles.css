@@ -29,7 +29,15 @@ h6 {
 
 #postAuthor {
   font-weight: bold;
-  color: #7E96C4;
+  color: black;
+}
+#followButton {
+  max-height: 30px;
+  font-size: small;
+  font-style: italic;
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 #postTimestamp {
   color: grey;
