@@ -6,6 +6,7 @@ import datetime
 
 class User(AbstractUser):
     pass
+
     def serialize(self):
         return {
             "id": self.id,
@@ -48,7 +49,8 @@ class Follower(models.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "user": self.username,
             "follower": [user.username for user in self.follower.all()],
-            "following": [user.username for user in self.following.all()]
+            "following": [user.username for user in self.following.all()],
+            "numberOfFollowers": self.follower.count(),
+            "numberOfFollowing": self.following.count()
         }

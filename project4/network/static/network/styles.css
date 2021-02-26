@@ -1,4 +1,5 @@
 h1 {
+  margin-top: 20px;
   margin-left: 10px;
 }
 h2 {
@@ -8,6 +9,9 @@ h2 {
 h6 {
   text-align: center;
   color: lightblue;
+}
+span {
+  margin-left: 10px;
 }
 
 #welcomeTitle {
@@ -32,6 +36,8 @@ h6 {
   color: black;
 }
 #followButton {
+  margin-left: 10px;
+  margin-top: 10px;
   max-height: 30px;
   font-size: small;
   font-style: italic;

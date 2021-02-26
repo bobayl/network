@@ -3,7 +3,11 @@
 
 {% block body %}
 
+<!-- Create the user id to be accessible in the Javascript file -->
+{{ request.user.username|json_script:"user_name" }}
+
 <!-- Show new post div if user is logged in -->
+
   {% if user.is_authenticated %}
     <div id="createPostView">
       <form id="postForm">
@@ -18,7 +22,19 @@
     </div>
 
     <div id="userView">
+      <h1><span>User: </span><span id="profileName"></span></h1>
+      <div>
+        <span>Email: </span><span id="userEmail" ></span>
+      </div>
+      <div>
+        <span>Followers: </span><span id="numberOfFollowers"></span>
+      </div>
+      <div>
+        <span>Following: </span><span id="numberOfFollowing"></span>
+      </div>
+      <button id="followButton" type="button" class="btn btn-primary"></button>
     </div>
+
     <div id="postsView">
       <h1>Posts</h1>
     </div>
