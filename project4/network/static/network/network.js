@@ -72,10 +72,10 @@ function show_user(username) {
   .then(response => response.json())
   .then(data => {
     if (currentUser in data.follower) {
-      console.log("is following ");
+      //console.log("is following ");
       document.querySelector('#followButton').innerHTML = "Unfollow";
     } else {
-      console.log("not following");
+      //console.log("not following");
       document.querySelector('#followButton').innerHTML = "Follow";
     }
   })
