@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Use Nav-Bar-Links to toggle between sites:
   document.querySelector('#userPage').addEventListener('click', () => show_user(user_name));
   document.querySelector('#allPosts').addEventListener('click', () => load_posts('all'));
-  document.querySelector('#following').addEventListener('click', () => load_posts('following'));
+  document.querySelector('#following').addEventListener('click', () => showFollowing('currentUser'));
 
   // Load the New Post section
   create_post();
@@ -27,14 +27,45 @@ function followers(user) {
   .then(response => response.json())
   .then(data => {
     console.log(data);
-    console.log('followers: ' + data.numberOfFollowers);
-    console.log('following: ' + data.numberOfFollowing);
 
     document.querySelector('#numberOfFollowers').innerHTML = data.numberOfFollowers;
     document.querySelector('#numberOfFollowing').innerHTML = data.numberOfFollowing;
   })
 }
 
+function showFollowing(user){
+  document.querySelector('#createPostView').style.display = 'none';
+  document.querySelector('#followButton').style.display = 'none';
+  document.querySelector('#followingView').style.display = 'block';
+  document.querySelector('#userView').style.display = 'none';
+  document.querySelector('#postsView').style.display = 'block';
+
+  let route = `/followers/${user}`;
+  fetch(route)
+  .then(response => response.json())
+  .then(data => {
+    // Clear the Following View:
+    document.querySelector('#followingView').innerHTML = "";
+    // Create the Following title:
+    let title = document.createElement('h1');
+    title.innerHTML = "Following";
+    document.querySelector('#followingView').append(title);
+    // Store the guys the user is following in the variable "followings":
+    let followings = data.following;
+    // Loop over the followings to list all of them:
+    for (following of followings) {
+      let followingContainer = document.createElement('div');
+      followingContainer.id = "followingContainer"
+      let name = following;
+      console.log(name);
+      followingContainer.innerHTML = name;
+      document.querySelector('#followingView').append(followingContainer);
+    }
+
+    // Display all post of the guys the user is following:
+    
+  })
+}
 
 // Shows the user profile followed by all posts of that user:
 function show_user(username) {
@@ -43,6 +74,7 @@ function show_user(username) {
 
   document.querySelector('#createPostView').style.display = 'none';
   document.querySelector('#followButton').style.display = 'none';
+  document.querySelector('#followingView').style.display = 'none';
   document.querySelector('#userView').style.display = 'block';
   document.querySelector('#postsView').style.display = 'block';
 
@@ -63,7 +95,6 @@ function show_user(username) {
     }
     document.querySelector('#userEmail').innerHTML = data.email;
     followers(username);
-
   })
 
   // Get followers and following of the selected user.
@@ -83,12 +114,7 @@ function show_user(username) {
   load_posts(username);
 }
 
-/*
-Follow or unfollow a user: First, the route is called via GET request to find out if the user is
-already following this author. If the user is NOT following this author, the follow-button text is
-set to "follow" and the onclick-function is added to the button to follow the author if clicked
-The opposite happens if the user is already following the author.
-*/
+
 function follow(user) {
   // Check if the user is following the author
   // And set the button text accordingly
@@ -128,13 +154,14 @@ function follow(user) {
 
 // Loads the post for a user (user can also be "all". Then all posts are shown)
 function load_posts(user) {
-  console.log('load posts() called');
+  console.log('load posts() called on: ' + user);
   // Show compose view and hide other views.
   let route = `/posts/${user}`;
   fetch(route)
   .then(response => response.json())
   .then(posts => {
     // console.log(posts);
+    document.querySelector('#followingView').style.display = 'none';
     document.querySelector('#postsView').innerHTML = "";
     var title = document.createElement('h1');
     title.innerHTML = "Posts";

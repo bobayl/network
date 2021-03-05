@@ -36,15 +36,14 @@ def posts(request, user):
     # Filter posts depending on which posts to show.
     if user == "all":
         posts = Post.objects.all()
-    elif user == "currentUser":
-        posts = Post.objects.filter(author = request.user)
+    elif user == "following":
+        posts = Post.objects.all()
     else:
         try:
             thisUser = User.objects.get(username = user)
             posts = Post.objects.filter(author = thisUser)
         except:
             return JsonResponse({"Error": "No such user"}, safe=False)
-
 
     posts = posts.order_by("-timestamp").all()
     posts = [post.serialize() for post in posts]
@@ -78,41 +77,9 @@ def follow(request, user): #'user' is the user to be followed, e.g. user "foo"
     follower = request.user # The logged in user is the follower.
     author = User.objects.get(username = user) # The function argument 'user' is the author
 
-    # Get the follow status via GET request
-    if request.method == 'GET':
-        # Get the follower object of the author
-        follow_author = Follower.objects.filter(user = author)
-
-        # If no Follower object exists for the author:
-        if follow_author.count() == 0:
-            # Create a Follower object for that author:
-            f = Follower(user = author)
-            f.save()
-            # Return that user is not following author
-            # +++TODO TODO TODO+++
-        else:
-            # Get the Follower object for the author:
-            f = Follower.objects.get(user = author)
-            print(f.follower.count())
-            print(f.follower.all())
-            # Get the current followers
-            followers = f.follower.all()
-            followers = [a for a in followers]
-            print(followers)
-            # Check if user is already in the followers list
-            if follower in followers:
-                # If so, return that user is following.
-                # TODO
-                print(f"{follower} follows {author}")
-                return JsonResponse({"isFollower": "True"}, safe=False)
-            else:
-                # If not, return that user is not following.
-                # TODO
-                print(f"user is not follower of {author}")
-                return JsonResponse({"isFollower": "False"}, safe=False)
 
     # Set the follow status via PUT request:
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         # Get the Follower object of the author:
         f = Follower.objects.get(user = author)
         data = json.loads(request.body)

@@ -50,3 +50,7 @@ span {
   font-size: small;
   font-style: italic;
 }
+
+#followingContainer {
+  margin-left: 10px;
+}
