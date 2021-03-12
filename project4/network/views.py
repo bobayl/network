@@ -37,7 +37,15 @@ def posts(request, user):
     if user == "all":
         posts = Post.objects.all()
     elif user == "following":
-        posts = Post.objects.all()
+        currentUser = request.user
+        followings = Follower.objects.get(user = currentUser)
+        print(followings)
+        followings = followings.serialize()
+        print(followings)
+        followings = followings["following"]
+        print(followings)
+        posts = Post.objects.filter(author__username__in = followings)
+        print(posts)
     else:
         try:
             thisUser = User.objects.get(username = user)

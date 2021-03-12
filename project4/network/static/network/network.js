@@ -38,7 +38,7 @@ function showFollowing(user){
   document.querySelector('#followButton').style.display = 'none';
   document.querySelector('#followingView').style.display = 'block';
   document.querySelector('#userView').style.display = 'none';
-  document.querySelector('#postsView').style.display = 'block';
+  document.querySelector('#postsView').style.display = 'none';
 
   let route = `/followers/${user}`;
   fetch(route)
@@ -63,7 +63,9 @@ function showFollowing(user){
     }
 
     // Display all post of the guys the user is following:
-    
+    load_posts('following');
+    document.querySelector('#postsView').style.display = 'block';
+
   })
 }
 
@@ -161,7 +163,7 @@ function load_posts(user) {
   .then(response => response.json())
   .then(posts => {
     // console.log(posts);
-    document.querySelector('#followingView').style.display = 'none';
+    //document.querySelector('#followingView').style.display = 'none';
     document.querySelector('#postsView').innerHTML = "";
     var title = document.createElement('h1');
     title.innerHTML = "Posts";
