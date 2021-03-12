@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Use Nav-Bar-Links to toggle between sites:
   document.querySelector('#userPage').addEventListener('click', () => show_user(user_name));
-  document.querySelector('#allPosts').addEventListener('click', () => load_posts('all'));
+  document.querySelector('#network').addEventListener('click', () => load_posts('all'));
   document.querySelector('#following').addEventListener('click', () => showFollowing('currentUser'));
 
   // Load the New Post section

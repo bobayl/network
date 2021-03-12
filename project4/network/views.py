@@ -147,6 +147,8 @@ def register(request):
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
+            follower = Follower.objects.create(user = user)
+            follower.save()
 
         except IntegrityError:
             return render(request, "network/register.html", {
