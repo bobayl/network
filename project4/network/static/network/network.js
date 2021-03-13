@@ -1,7 +1,6 @@
 // Load the DOM and attach the event listeners to the menu items:
 document.addEventListener('DOMContentLoaded', function() {
   const user_name = JSON.parse(document.getElementById('user_name').textContent);
-  console.log('user_name: ' + user_name);
 
   document.querySelector('#createPostView').style.display = 'block';
   document.querySelector('#userView').style.display = 'none';
@@ -11,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#userPage').addEventListener('click', () => show_user(user_name));
   document.querySelector('#network').addEventListener('click', () => load_posts('all'));
   document.querySelector('#following').addEventListener('click', () => showFollowing('currentUser'));
+  document.querySelector('#followers').addEventListener('click', () => showFollowers('currentUser'));
 
   // Load the New Post section
   create_post();
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function that returns the list of followers of a user and the list of the users the user is following.
 function followers(user) {
-  console.log('followers called on ' + user);
+  console.log('followers() called on ' + user);
   let route = `/followers/${user}`;
   fetch(route)
   .then(response => response.json())
@@ -33,7 +33,41 @@ function followers(user) {
   })
 }
 
+function showFollowers(user){
+  console.log("showFollowers() called on " + user);
+
+  document.querySelector('#createPostView').style.display = 'none';
+  document.querySelector('#followButton').style.display = 'none';
+  document.querySelector('#followingView').style.display = 'block';
+  document.querySelector('#userView').style.display = 'none';
+  document.querySelector('#postsView').style.display = 'none';
+
+  let route = `/followers/${user}`;
+  fetch(route)
+  .then(response => response.json())
+  .then(data => {
+    // Clear the Following View:
+    document.querySelector('#followingView').innerHTML = "";
+    // Create the Following title:
+    let title = document.createElement('h1');
+    title.innerHTML = "Followers";
+    document.querySelector('#followingView').append(title);
+    // Store the guys the user is following in the variable "followings":
+    let followers = data.follower;
+    // Loop over the followings to list all of them:
+    for (follower of followers) {
+      let followerContainer = document.createElement('div');
+      followerContainer.id = "followerContainer"
+      let name = follower;
+      followerContainer.innerHTML = name;
+      document.querySelector('#followingView').append(followerContainer);
+    }
+  })
+}
+
 function showFollowing(user){
+  console.log("showFollowing() called on " + user);
+
   document.querySelector('#createPostView').style.display = 'none';
   document.querySelector('#followButton').style.display = 'none';
   document.querySelector('#followingView').style.display = 'block';
@@ -57,7 +91,6 @@ function showFollowing(user){
       let followingContainer = document.createElement('div');
       followingContainer.id = "followingContainer"
       let name = following;
-      console.log(name);
       followingContainer.innerHTML = name;
       document.querySelector('#followingView').append(followingContainer);
     }
@@ -73,7 +106,7 @@ function showFollowing(user){
 function show_user(username) {
 
   console.log('show_user() called on: ' + username);
-
+  // Display and hid the relevant blocks:
   document.querySelector('#createPostView').style.display = 'none';
   document.querySelector('#followButton').style.display = 'none';
   document.querySelector('#followingView').style.display = 'none';
@@ -91,67 +124,65 @@ function show_user(username) {
 
     // Display the follow button:
     const currentUser = JSON.parse(document.getElementById('user_name').textContent);
-    console.log('currentUser: ' + currentUser);
+    // Show or not show the follow-button:
     if (data.username != currentUser) {
       document.querySelector('#followButton').style.display = 'block';
     }
     document.querySelector('#userEmail').innerHTML = data.email;
+    // Load and display number of followers and following of the user:
     followers(username);
   })
 
-  // Get followers and following of the selected user.
-  route = `/followers/${username}`;
-  fetch(route)
-  .then(response => response.json())
-  .then(data => {
-    if (currentUser in data.follower) {
-      //console.log("is following ");
-      document.querySelector('#followButton').innerHTML = "Unfollow";
-    } else {
-      //console.log("not following");
-      document.querySelector('#followButton').innerHTML = "Follow";
-    }
-  })
   // Load and display all posts of that user
   load_posts(username);
+  followButton(username);
 }
 
-
-function follow(user) {
-  // Check if the user is following the author
-  // And set the button text accordingly
-  let route = `/follow/${user}`;
-  //Fetch the route via GET request. This calls the "follow" function in views.py with a GET request.
+function followButton(username) {
+  console.log('followButton() called on: ' + username);
+  const currentUser = JSON.parse(document.getElementById('user_name').textContent);
+  route = `/followers/${username}`;
+  // Retrieve the follower data:
   fetch(route)
   .then(response => response.json())
   .then(data => {
     console.log(data);
-    // Analyze the returned data and update the button text and the follower.
-    if (data.isFollower == "False") {
-      followButton.innerHTML = "Follow " + postAuthor;
-      followButton.onclick = function() {
-        fetch(route, {
-        method: 'PUT',
-        body: JSON.stringify({
-            addFollower: "True"
-          })
-        })
-        followButton.innerHTML = "Unfollow " + postAuthor;
+    // Extract the followers
+    const followers = Object.values(data.follower);
+    // If the current user is in the list of followers:
+    if (followers.includes(currentUser)) {
+      document.querySelector('#followButton').innerHTML = "Unfollow";
+      document.querySelector('#followButton').onclick = function() {
+        unfollow(username);
+        show_user(username);
+        document.querySelector('#followButton').innerHTML = "Follow";
       }
-    }
-    else {
-      followButton.innerHTML = "Unfollow " + postAuthor;
-      followButton.onclick = function() {
-        fetch(route, {
-        method: 'PUT',
-        body: JSON.stringify({
-            addFollower: "False"
-          })
-        })
-        followButton.innerHTML = "Follow " + postAuthor;
+    } else {
+      document.querySelector('#followButton').innerHTML = "Follow";
+      document.querySelector('#followButton').onclick = function() {
+        follow(username);
+        show_user(username);
+        document.querySelector('#followButton').innerHTML = "Unfollow";
       }
     }
   })
+}
+
+function follow(user) {
+  console.log('follow() called on ' + user);
+  let route = `/follow/${user}`;
+  //Fetch the route via GET request. This calls the "follow" function in views.py with a GET request.
+  fetch(route);
+
+
+}
+function unfollow(user) {
+  console.log('unfollow() called on ' + user);
+  let route = `/unfollow/${user}`;
+  //Fetch the route via GET request. This calls the "follow" function in views.py with a GET request.
+  fetch(route);
+
+  //document.querySelector('#followButton').innerHTML = "Follow";
 }
 
 // Loads the post for a user (user can also be "all". Then all posts are shown)
@@ -186,7 +217,6 @@ function load_posts(user) {
         this.style = "color: black;"
       }
       author.onclick = function() {
-        console.log('onClick: ' + postAuthor);
         show_user(postAuthor);
       }
 

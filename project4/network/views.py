@@ -84,21 +84,36 @@ def followers(request, username):
 def follow(request, user): #'user' is the user to be followed, e.g. user "foo"
     follower = request.user # The logged in user is the follower.
     author = User.objects.get(username = user) # The function argument 'user' is the author
-
-
     # Set the follow status via PUT request:
-    if request.method == 'PUT':
+    if request.method == 'GET':
         # Get the Follower object of the author:
         f = Follower.objects.get(user = author)
-        data = json.loads(request.body)
-        if data.get("addFollower") == True:
-            f.follower.add(follower)
-            f.save()
-            return HttpResponse(status=204)
-        else:
-            f.follower.remove(follower)
-            f.save()
-            return HttpResponse(status=204)
+        f.follower.add(follower)
+        f.save()
+        g = Follower.objects.get(user = follower)
+        g.following.add(author)
+        g.save()
+        return HttpResponse(status=204)
+    else:
+        return JsonResponse({
+            "error": "GET or PUT request required."
+        }, status=400)
+
+@csrf_exempt
+@login_required
+def unfollow(request, user):
+    follower = request.user # The logged in user is the follower.
+    author = User.objects.get(username = user) # The function argument 'user' is the author
+    # Set the follow status via PUT request:
+    if request.method == 'GET':
+        # Get the Follower object of the author:
+        f = Follower.objects.get(user = author)
+        f.follower.remove(follower)
+        f.save()
+        g = Follower.objects.get(user = follower)
+        g.following.remove(author)
+        g.save()
+        return HttpResponse(status=204)
     else:
         return JsonResponse({
             "error": "GET or PUT request required."

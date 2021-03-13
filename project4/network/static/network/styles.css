@@ -20,6 +20,10 @@ span {
   color: #7E96C4;
 }
 
+#userTitle {
+  margin-left: 0px;
+}
+
 #createPostView, #postContainer{
   max-width: 800px;
   border-style: solid;
@@ -29,11 +33,15 @@ span {
   padding: 10px;
   margin: 10px;
   margin-right: 10px;
+  margin-left: 10px;
 }
 
 #postAuthor {
   font-weight: bold;
   color: black;
+}
+#profileName {
+  margin-left: 0px;
 }
 #followButton {
   margin-left: 10px;
@@ -51,6 +59,6 @@ span {
   font-style: italic;
 }
 
-#followingContainer {
+#followingContainer, #followerContainer {
   margin-left: 10px;
 }
