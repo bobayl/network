@@ -15,7 +15,7 @@ class User(AbstractUser):
 
 class Post(models.Model):
     content = models.CharField(max_length = 1000)
-    likes = models.PositiveIntegerField(default = 0)
+    likes = models.ManyToManyField(User, related_name = "likes")
     timestamp = models.DateTimeField(auto_now_add = True)
     author = models.ForeignKey(User, on_delete = models.CASCADE)
 
@@ -26,7 +26,7 @@ class Post(models.Model):
         return {
             "id": self.id,
             "content": self.content,
-            "likes": self.likes,
+            "likes": [user.username for user in self.likes.all()],
             "timestamp": self.timestamp.strftime("%b %-d %Y, %-I:%M %p"),
             "author": self.author.username}
 
