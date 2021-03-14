@@ -187,6 +187,7 @@ function unfollow(user) {
 
 // Loads the post for a user (user can also be "all". Then all posts are shown)
 function load_posts(user) {
+  const user_name = JSON.parse(document.getElementById('user_name').textContent);
   console.log('load posts() called on: ' + user);
   // Show compose view and hide other views.
   let route = `/posts/${user}`;
@@ -201,17 +202,24 @@ function load_posts(user) {
     document.querySelector('#postsView').append(title);
 
     var post;
+    //console.log(posts);
     for (post of posts) {
+      const postId = post.id;
+      //console.log(post);
+      let likes = Object.values(post.likes);
+      //console.log(likes);
+      //console.log(post.id);
+      //console.log(post.likes);
       const postAuthor = post.author;
       // Create a container for each post:
-      var postContainer = document.createElement('div');
+      let postContainer = document.createElement('div');
       postContainer.id = 'postContainer';
-
-      var author = document.createElement('div');
+      // Create the author line (1st part of the post):
+      let author = document.createElement('div');
       author.id = 'postAuthor';
       author.innerHTML = post.author;
       author.onmouseover = function() {
-        this.style = "color: grey;"
+        this.style = "color: grey; cursor: pointer;"
       }
       author.onmouseout = function() {
         this.style = "color: black;"
@@ -219,21 +227,59 @@ function load_posts(user) {
       author.onclick = function() {
         show_user(postAuthor);
       }
-
-      var content = document.createElement('div');
+      // Create the text content of the post:
+      let content = document.createElement('div');
       content.id = 'postContent';
       content.innerHTML = post.content;
-      var timestamp = document.createElement('div');
+      // Create the timestamp of the post:
+      let timestamp = document.createElement('div');
       timestamp.id = 'postTimestamp';
       timestamp.innerHTML = post.timestamp;
-      var likes = document.createElement('div');
-      likes.id = 'postLikes';
-      likes.innerHTML = "&#128154; " + post.likes;
+      // Create the likes section of the post:
+      let postLikes = document.createElement('div');
+      postLikes.id = 'postLikes';
+      // Check if the post is already liked by the user:
+      if (likes.includes(user_name)) {
+        postLikes.innerHTML = "&#128154; " + likes.length;
+        postLikes.style = "opacity: 0.5;"
+        postLikes.onmouseover = function() {
+          this.style = "cursor: pointer; opacity: 0.5;"
+        }
+      } else {
+        postLikes.innerHTML = "&#128154; " + likes.length;
+        postLikes.onmouseover = function() {
+          this.innerHTML = "&#128153; " + likes.length;
+          this.style = "cursor: pointer;"
+        }
+        postLikes.onmouseout = function() {
+          this.innerHTML = "&#128154; " + likes.length;
+        }
+        postLikes.onclick = function() {
+          if (!likes.includes(user_name)){
+            // Add the user to the likes list of the post
+            route = `/likes/${postId}`;
+            fetch(route)
+            .then(response => response.json())
+            .then(data => {
+              likes = Object.values(data.likes);
+              postLikes.innerHTML = "&#128154; " + likes.length;
+              postLikes.style = "opacity: 0.5;"
+              postLikes.onmouseover = function() {
+                this.style = "cursor: pointer; opacity: 0.5;"
+              }
+              postLikes.onmouseout = function() {
+                postLikes.style = "opacity: 0.5;"
+              }
+            })
+          }
+        }
+      }
+
 
       postContainer.appendChild(author);
       postContainer.appendChild(content);
       postContainer.appendChild(timestamp);
-      postContainer.appendChild(likes);
+      postContainer.appendChild(postLikes);
 
       document.querySelector('#postsView').append(postContainer);
     }

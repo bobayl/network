@@ -29,8 +29,18 @@ def create_post(request):
     newPost.save()
     return render(request, "network/index.html")
 
-# The home page: Shows all posts. No need to be logged in.
+@login_required
+def likes(request, post):
+    print(f"likes() called on post {post}")
+    user = request.user
+    post = Post.objects.get(pk = post)
+    post.likes.add(user)
+    post.save()
+    post = post.serialize()
+    return JsonResponse(post, safe = False)
 
+
+# The home page: Shows all posts. No need to be logged in.
 @login_required
 def posts(request, user):
     # Filter posts depending on which posts to show.
@@ -39,13 +49,9 @@ def posts(request, user):
     elif user == "following":
         currentUser = request.user
         followings = Follower.objects.get(user = currentUser)
-        print(followings)
         followings = followings.serialize()
-        print(followings)
         followings = followings["following"]
-        print(followings)
         posts = Post.objects.filter(author__username__in = followings)
-        print(posts)
     else:
         try:
             thisUser = User.objects.get(username = user)
@@ -68,13 +74,10 @@ def followers(request, username):
     # Check if the request is for the logged in user:
     if username == 'currentUser':
         user = request.user
-        print(f'currentUser: {user}')
     else:
         user = User.objects.get(username = username)
-        print(f'user: {user}')
     followers = Follower.objects.get(user = user)
     followers = followers.serialize()
-    print(f"followers: {followers}")
     return JsonResponse(followers, safe=False)
 
 
