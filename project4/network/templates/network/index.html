@@ -9,6 +9,11 @@
 <!-- Show new post div if user is logged in -->
 
   {% if user.is_authenticated %}
+  <div class="btn-group" role="group" aria-label="Basic outlined example" id="paginator">
+    <button type="button" id="previousPage" class="btn btn-outline-primary">Previous</button>
+    <button type="button" id="nextPage" class="btn btn-outline-primary">Next</button>
+  </div>
+
     <div id="createPostView">
       <form id="postForm">
         <div class="form-group">
@@ -36,12 +41,13 @@
     </div>
 
     <div id="followingView">
-
     </div>
 
     <div id="postsView">
       <h1>Posts</h1>
     </div>
+
+
   {% endif %}
 
 {% endblock %}

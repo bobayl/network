@@ -1,3 +1,6 @@
+// Define global variables:
+var pageNumber = 1;
+
 // Load the DOM and attach the event listeners to the menu items:
 document.addEventListener('DOMContentLoaded', function() {
   const user_name = JSON.parse(document.getElementById('user_name').textContent);
@@ -7,10 +10,20 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#postsView').style.display = 'block';
 
   // Use Nav-Bar-Links to toggle between sites:
-  document.querySelector('#userPage').addEventListener('click', () => show_user(user_name));
-  document.querySelector('#network').addEventListener('click', () => load_posts('all'));
-  document.querySelector('#following').addEventListener('click', () => showFollowing('currentUser'));
-  document.querySelector('#followers').addEventListener('click', () => showFollowers('currentUser'));
+  document.querySelector('#userPage').addEventListener('click', () => {
+    pageNumber = 1;
+    show_user(user_name);
+  });
+  document.querySelector('#network').addEventListener('click', () => {
+    pageNumber = 1;
+    load_posts('all');
+  });
+
+  document.querySelector('#following').addEventListener('click', () => {
+    pageNumber = 1;
+    showFollowing('currentUser');
+  });
+
 
   // Load the New Post section
   create_post();
@@ -185,16 +198,57 @@ function unfollow(user) {
   //document.querySelector('#followButton').innerHTML = "Follow";
 }
 
+function update_paginator(user) {
+  console.log("update_paginator() called on: " + user);
+  document.querySelector('#nextPage').onclick = function() {
+    pageNumber++;
+    console.log("new page number: " + pageNumber);
+    load_posts(user);
+  }
+  document.querySelector('#previousPage').onclick = function() {
+    pageNumber--;
+    load_posts(user);
+  }
+  let route = `/update_paginator/${user}`;
+  console.log("route: " + route);
+  fetch(route)
+  .then(response => response.json())
+  .then(data => {
+    let numberOfPages = data.numberOfPages;
+    if (pageNumber <= 1) {
+      pageNumber = 1;
+      document.querySelector('#previousPage').disabled = true;
+      if (pageNumber < numberOfPages){
+        document.querySelector('#nextPage').disabled = false;
+      }
+    } else if (pageNumber < numberOfPages) {
+      document.querySelector('#nextPage').disabled = false;
+      if (pageNumber > 1) {
+        document.querySelector('#previousPage').disabled = false;
+      }
+    } else {
+      pageNumber = numberOfPages;
+      document.querySelector('#nextPage').disabled = true;
+    }
+    console.log("numberOfPages: " + data.numberOfPages);
+  })
+}
+
 // Loads the post for a user (user can also be "all". Then all posts are shown)
 function load_posts(user) {
+  console.log("load_posts() called on " + user);
+  update_paginator(user);
+  // Get the current user:
   const user_name = JSON.parse(document.getElementById('user_name').textContent);
-  console.log('load posts() called on: ' + user);
+
   // Show compose view and hide other views.
-  let route = `/posts/${user}`;
+  console.log("pageNumber: " + pageNumber);
+  let route = `/posts/${user}?page=${pageNumber}`;
+  console.log("route: " + route);
   fetch(route)
   .then(response => response.json())
   .then(posts => {
-    // console.log(posts);
+    console.log(posts);
     //document.querySelector('#followingView').style.display = 'none';
     document.querySelector('#postsView').innerHTML = "";
     var title = document.createElement('h1');

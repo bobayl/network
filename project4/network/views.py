@@ -7,8 +7,12 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 from .models import User, Post, Comment, Follower
+
+# Global variables:
+numberOfPostsPerPage = 2
 
 def entry(request):
     return render(request, "network/entry.html")
@@ -31,7 +35,6 @@ def create_post(request):
 
 @login_required
 def likes(request, post):
-    print(f"likes() called on post {post}")
     user = request.user
     post = Post.objects.get(pk = post)
     post.likes.add(user)
@@ -39,10 +42,46 @@ def likes(request, post):
     post = post.serialize()
     return JsonResponse(post, safe = False)
 
+# Updating the paginator:
+@login_required
+def update_paginator(request, user):
+    numberOfPosts = 0
+    numberOfPages = 0
+    # Filter posts depending on which posts to show.
+    print("in here update_paginator")
+    if user == "all":
+        posts = Post.objects.all()
+    elif user == "following":
+        currentUser = request.user
+        followings = Follower.objects.get(user = currentUser)
+        followings = followings.serialize()
+        followings = followings["following"]
+        posts = Post.objects.filter(author__username__in = followings)
+    else:
+        thisUser = User.objects.get(username = user)
+        posts = Post.objects.filter(author = thisUser)
 
-# The home page: Shows all posts. No need to be logged in.
+    numberOfPosts = posts.count()
+    print(f'numberOfPosts: {numberOfPosts}')
+    lastPage = numberOfPosts%numberOfPostsPerPage
+    if lastPage == 0:
+        numberOfPages = int(numberOfPosts/numberOfPostsPerPage)
+    else:
+        numberOfPages = int(numberOfPosts/numberOfPostsPerPage) + 1
+    print(f'numberOfPages: {numberOfPages}')
+    mydata = {"numberOfPages": numberOfPages}
+    return JsonResponse(mydata)
+
+
+
+# Loading posts:
 @login_required
 def posts(request, user):
+    print(f"posts() called on {user}")
+    # For pagination: Extract the page number requested from the GET request.
+    pageNumber = int(request.GET.get("page") or 1)
+    print(pageNumber)
+
     # Filter posts depending on which posts to show.
     if user == "all":
         posts = Post.objects.all()
@@ -60,7 +99,10 @@ def posts(request, user):
             return JsonResponse({"Error": "No such user"}, safe=False)
 
     posts = posts.order_by("-timestamp").all()
+    paginator = Paginator(posts, numberOfPostsPerPage)
+    posts = paginator.get_page(pageNumber)
     posts = [post.serialize() for post in posts]
+
     return JsonResponse(posts, safe=False)
 
 @login_required

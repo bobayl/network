@@ -36,6 +36,15 @@ span {
   margin-left: 10px;
 }
 
+#paginator {
+  margin-left: 10px;
+  margin-top: 10px;
+}
+#paginationSet {
+  display: flex;
+  align-self: center;
+}
+
 #postAuthor {
   font-weight: bold;
   color: black;
