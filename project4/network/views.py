@@ -12,7 +12,7 @@ from django.core.paginator import Paginator
 from .models import User, Post, Comment, Follower
 
 # Global variables:
-numberOfPostsPerPage = 2
+numberOfPostsPerPage = 10
 
 def entry(request):
     return render(request, "network/entry.html")
@@ -32,6 +32,19 @@ def create_post(request):
     newPost = Post(content = content, author = request.user)
     newPost.save()
     return render(request, "network/index.html")
+
+@csrf_exempt
+@login_required
+def update_post(request, post):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    data = json.loads(request.body)
+    content = data.get("content")
+    post_to_edit = Post.objects.get(id = post)
+    post_to_edit.content = content
+    post_to_edit.save()
+    return JsonResponse({"new text": content}, status=200)
 
 @login_required
 def likes(request, post):

@@ -4,11 +4,11 @@ h1 {
 }
 h2 {
   text-align: center;
-  color: lightgrey;
+  color: grey;
 }
 h6 {
   text-align: center;
-  color: lightblue;
+  color: grey;
 }
 span {
   margin-left: 10px;
@@ -17,7 +17,7 @@ span {
 #welcomeTitle {
   text-align: center;
   margin-top: 50px;
-  color: #7E96C4;
+  color: black;
 }
 
 #userTitle {
@@ -40,9 +40,19 @@ span {
   margin-left: 10px;
   margin-top: 10px;
 }
-#paginationSet {
-  display: flex;
-  align-self: center;
+
+#commentButton {
+  height: 20px;
+  margin-top: 5px;
+  padding: 0px;
+  font-size: small;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.editLink, .cancelLink {
+  font-size: small;
+  margin-bottom: 20px;
 }
 
 #postAuthor {
@@ -66,6 +76,7 @@ span {
   color: grey;
   font-size: small;
   font-style: italic;
+  margin-top: 10px;
 }
 
 #followingContainer, #followerContainer {

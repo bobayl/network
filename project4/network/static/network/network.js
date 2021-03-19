@@ -256,14 +256,9 @@ function load_posts(user) {
     document.querySelector('#postsView').append(title);
 
     var post;
-    //console.log(posts);
     for (post of posts) {
       const postId = post.id;
-      //console.log(post);
       let likes = Object.values(post.likes);
-      //console.log(likes);
-      //console.log(post.id);
-      //console.log(post.likes);
       const postAuthor = post.author;
       // Create a container for each post:
       let postContainer = document.createElement('div');
@@ -281,10 +276,23 @@ function load_posts(user) {
       author.onclick = function() {
         show_user(postAuthor);
       }
+
       // Create the text content of the post:
       let content = document.createElement('div');
-      content.id = 'postContent';
+      content.id = 'postContent' + postId;
       content.innerHTML = post.content;
+
+      // Create the editing field:
+      let editForm = document.createElement('form');
+      editForm.id = "editForm" + postId;
+      editForm.className = "form-group";
+      let editField = document.createElement('textarea');
+      editField.className = "form-control";
+      editField.id = "editField" + postId;
+      editField.rows = "5";
+      editForm.appendChild(editField);
+      editForm.style.display = "none";
+
       // Create the timestamp of the post:
       let timestamp = document.createElement('div');
       timestamp.id = 'postTimestamp';
@@ -329,15 +337,100 @@ function load_posts(user) {
         }
       }
 
-
       postContainer.appendChild(author);
       postContainer.appendChild(content);
+      postContainer.appendChild(editForm);
+
+      // Create the edit link for an own post:
+      if (post.author == user_name) {
+        let editLink = document.createElement('a');
+        editLink.className = "editLink";
+        editLink.id = "editLink" + postId;
+        editLink.innerHTML = "Edit";
+        editLink.href = 'javascript:void(0)';
+        editLink.onclick = function() {
+          editPost(postId);
+        }
+        let cancelLink = document.createElement('a');
+        cancelLink.className = "cancelLink";
+        cancelLink.id = "cancelLink" + postId;
+        cancelLink.innerHTML = "Cancel";
+        cancelLink.href = 'javascript:void(0)';
+        cancelLink.style.display = "none";
+        cancelLink.onclick = function() {
+          cancelEdit(postId);
+        }
+        postContainer.appendChild(editLink);
+        postContainer.appendChild(cancelLink);
+      }
+
       postContainer.appendChild(timestamp);
       postContainer.appendChild(postLikes);
 
+      // Create the comment button for the own posts:
+      // Check if the post is not from a logged in user:
+      if (post.author != user_name) {
+        let commentButton = document.createElement('button');
+        commentButton.id = "commentButton";
+        commentButton.type = "button";
+        commentButton.innerHTML = "Comment";
+        commentButton.className = "btn btn-outline-dark";
+        postContainer.appendChild(commentButton);
+      }
+
+      // Append the Post to the list of posts:
       document.querySelector('#postsView').append(postContainer);
     }
   })
+}
+
+// Edit a post:
+function editPost(postId) {
+  console.log("editing post: " + postId);
+  document.querySelector('#editForm' + postId).style.display = "block";
+  let postText = document.querySelector('#postContent' + postId).innerHTML;
+  console.log("post text: " + postText);
+  document.querySelector('#editField' + postId).innerHTML = postText;
+  document.querySelector('#postContent' + postId).style.display = "none";
+  document.querySelector('#editLink' + postId).innerHTML = "Save";
+  document.querySelector('#cancelLink' + postId).style.display = "block";
+
+  // Submit the edit:
+  document.querySelector('#editLink' + postId).onclick = function() {
+    let content = document.querySelector('#editField' + postId).value;
+    document.querySelector('#postContent' + postId).innerHTML = content;
+    console.log(content);
+    let route = `/update_post/${postId}`
+    fetch(route, {
+      method: 'POST',
+      body: JSON.stringify({
+        content: content
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      // Print result
+      console.log(`Success: updated to ${data}`);
+      document.querySelector('#editForm' + postId).style.display = "none";
+      document.querySelector('#postContent' + postId).style.display = "block";
+      document.querySelector('#cancelLink' + postId).style.display = "none";
+      document.querySelector('#editLink' + postId).innerHTML = "Edit";
+      document.querySelector('#editLink' + postId).onclick = function() {
+        editPost(postId);
+      };
+      //console.log('in here');
+    });
+  }
+}
+function cancelEdit(postId) {
+  document.querySelector('#editForm' + postId).style.display = "none";
+  document.querySelector('#postContent' + postId).style.display = "block";
+  document.querySelector('#editLink' + postId).innerHTML = "Edit";
+  document.querySelector('#editLink' + postId).onclick = function() {
+    editPost(postId);
+  };
+  document.querySelector('#cancelLink' + postId).style.display = "none";
 }
 
 // Create a new post:
