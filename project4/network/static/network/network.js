@@ -34,21 +34,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function that returns the list of followers of a user and the list of the users the user is following.
 function followers(user) {
-  console.log('followers() called on ' + user);
   let route = `/followers/${user}`;
   fetch(route)
   .then(response => response.json())
   .then(data => {
-    console.log(data);
-
     document.querySelector('#numberOfFollowers').innerHTML = data.numberOfFollowers;
     document.querySelector('#numberOfFollowing').innerHTML = data.numberOfFollowing;
   })
 }
 
 function showFollowers(user){
-  console.log("showFollowers() called on " + user);
-
   document.querySelector('#createPostView').style.display = 'none';
   document.querySelector('#followButton').style.display = 'none';
   document.querySelector('#followingView').style.display = 'block';
@@ -79,8 +74,6 @@ function showFollowers(user){
 }
 
 function showFollowing(user){
-  console.log("showFollowing() called on " + user);
-
   document.querySelector('#createPostView').style.display = 'none';
   document.querySelector('#followButton').style.display = 'none';
   document.querySelector('#followingView').style.display = 'block';
@@ -118,7 +111,6 @@ function showFollowing(user){
 // Shows the user profile followed by all posts of that user:
 function show_user(username) {
 
-  console.log('show_user() called on: ' + username);
   // Display and hid the relevant blocks:
   document.querySelector('#createPostView').style.display = 'none';
   document.querySelector('#followButton').style.display = 'none';
@@ -131,7 +123,6 @@ function show_user(username) {
   fetch(route)
   .then(response => response.json())
   .then(data => {
-    console.log(data);
     // Display the username in the h1 title:
     document.querySelector('#profileName').innerHTML = data.username;
 
@@ -152,14 +143,12 @@ function show_user(username) {
 }
 
 function followButton(username) {
-  console.log('followButton() called on: ' + username);
   const currentUser = JSON.parse(document.getElementById('user_name').textContent);
   route = `/followers/${username}`;
   // Retrieve the follower data:
   fetch(route)
   .then(response => response.json())
   .then(data => {
-    console.log(data);
     // Extract the followers
     const followers = Object.values(data.follower);
     // If the current user is in the list of followers:
@@ -182,7 +171,6 @@ function followButton(username) {
 }
 
 function follow(user) {
-  console.log('follow() called on ' + user);
   let route = `/follow/${user}`;
   //Fetch the route via GET request. This calls the "follow" function in views.py with a GET request.
   fetch(route);
@@ -190,7 +178,6 @@ function follow(user) {
 
 }
 function unfollow(user) {
-  console.log('unfollow() called on ' + user);
   let route = `/unfollow/${user}`;
   //Fetch the route via GET request. This calls the "follow" function in views.py with a GET request.
   fetch(route);
@@ -199,10 +186,8 @@ function unfollow(user) {
 }
 
 function update_paginator(user) {
-  console.log("update_paginator() called on: " + user);
   document.querySelector('#nextPage').onclick = function() {
     pageNumber++;
-    console.log("new page number: " + pageNumber);
     load_posts(user);
   }
   document.querySelector('#previousPage').onclick = function() {
@@ -210,7 +195,6 @@ function update_paginator(user) {
     load_posts(user);
   }
   let route = `/update_paginator/${user}`;
-  console.log("route: " + route);
   fetch(route)
   .then(response => response.json())
   .then(data => {
@@ -229,26 +213,22 @@ function update_paginator(user) {
     } else {
       pageNumber = numberOfPages;
       document.querySelector('#nextPage').disabled = true;
+      document.querySelector('#previousPage').disabled = false;
     }
-    console.log("numberOfPages: " + data.numberOfPages);
   })
 }
 
 // Loads the post for a user (user can also be "all". Then all posts are shown)
 function load_posts(user) {
-  console.log("load_posts() called on " + user);
   update_paginator(user);
   // Get the current user:
   const user_name = JSON.parse(document.getElementById('user_name').textContent);
 
   // Show compose view and hide other views.
-  console.log("pageNumber: " + pageNumber);
   let route = `/posts/${user}?page=${pageNumber}`;
-  console.log("route: " + route);
   fetch(route)
   .then(response => response.json())
   .then(posts => {
-    console.log(posts);
     //document.querySelector('#followingView').style.display = 'none';
     document.querySelector('#postsView').innerHTML = "";
     var title = document.createElement('h1');
@@ -386,10 +366,8 @@ function load_posts(user) {
 
 // Edit a post:
 function editPost(postId) {
-  console.log("editing post: " + postId);
   document.querySelector('#editForm' + postId).style.display = "block";
   let postText = document.querySelector('#postContent' + postId).innerHTML;
-  console.log("post text: " + postText);
   document.querySelector('#editField' + postId).innerHTML = postText;
   document.querySelector('#postContent' + postId).style.display = "none";
   document.querySelector('#editLink' + postId).innerHTML = "Save";
@@ -399,7 +377,6 @@ function editPost(postId) {
   document.querySelector('#editLink' + postId).onclick = function() {
     let content = document.querySelector('#editField' + postId).value;
     document.querySelector('#postContent' + postId).innerHTML = content;
-    console.log(content);
     let route = `/update_post/${postId}`
     fetch(route, {
       method: 'POST',
@@ -409,9 +386,7 @@ function editPost(postId) {
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data);
       // Print result
-      console.log(`Success: updated to ${data}`);
       document.querySelector('#editForm' + postId).style.display = "none";
       document.querySelector('#postContent' + postId).style.display = "block";
       document.querySelector('#cancelLink' + postId).style.display = "none";
@@ -419,7 +394,6 @@ function editPost(postId) {
       document.querySelector('#editLink' + postId).onclick = function() {
         editPost(postId);
       };
-      //console.log('in here');
     });
   }
 }
@@ -435,7 +409,6 @@ function cancelEdit(postId) {
 
 // Create a new post:
 function create_post() {
-  console.log('create post() called');
   // Clear compose text area.
   document.querySelector('#postText').value = '';
 
@@ -454,7 +427,6 @@ function create_post() {
     .then(data => {
       // Print result
       console.log(`Success: sent ${data}`);
-      console.log('in here');
     });
   }
 }
