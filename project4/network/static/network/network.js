@@ -350,18 +350,156 @@ function load_posts(user) {
       // Create the comment button for the own posts:
       // Check if the post is not from a logged in user:
       if (post.author != user_name) {
+        let commentField = document.createElement('textarea');
+
+        commentField.className = "form-control";
+        commentField.id = "commentField" + postId;
+        commentField.rows = "2";
+        postContainer.appendChild(commentField);
+        commentField.style.display = "none";
+
         let commentButton = document.createElement('button');
-        commentButton.id = "commentButton";
+        commentButton.id = "commentButton" + postId;
         commentButton.type = "button";
         commentButton.innerHTML = "Comment";
         commentButton.className = "btn btn-outline-dark";
+        commentButton.style = "height: 20px; padding: 0px; font-size: small; padding-left: 5px; padding-right: 5px";
+        commentButton.onclick = function() {
+          commentPost(postId);
+        }
         postContainer.appendChild(commentButton);
+
+        let commentCancel = document.createElement('button');
+        commentCancel.id = "commentCancel" + postId;
+        commentCancel.type = "button";
+        commentCancel.innerHTML = "Cancel";
+        commentCancel.className = "btn btn-outline-dark";
+        commentCancel.style = "height: 20px; padding: 0px; font-size: small; padding-left: 5px; padding-right: 5px";
+        postContainer.appendChild(commentCancel);
+        commentCancel.style.display = "none";
+        commentCancel.onclick = function() {
+          cancelComment(postId);
+        }
       }
+
+      // Create the comment link for each post in the bottom right of the post:
+      let commentContainer = document.createElement('div');
+      commentContainer.id = "commentContainer" + postId;
+      if (post.comments > 0) {
+        let numberOfComments = document.createElement('span');
+        numberOfComments.id = "numberOfComments" + postId;
+        numberOfComments.className = "showCommentLink";
+        numberOfComments.innerHTML = post.comments;
+        numberOfComments.style.display = "none";
+        let showCommentLink = document.createElement('a');
+        showCommentLink.id = "showCommentLink" + postId;
+        showCommentLink.className = "showCommentLink";
+        showCommentLink.innerHTML = "Show " + numberOfComments.innerHTML + " Comments";
+        showCommentLink.href = 'javascript:void(0)';
+        showCommentLink.onclick = function() {
+          showComments(postId);
+        }
+        postContainer.appendChild(showCommentLink);
+        postContainer.appendChild(numberOfComments);
+      } else {
+        let showCommentLink = document.createElement('a');
+        showCommentLink.id = "showCommentLink" + postId;
+        showCommentLink.className = "showCommentLink";
+        showCommentLink.innerHTML = "No comments to show";
+        showCommentLink.href = 'javascript:void(0)';
+        showCommentLink.disabled = true;
+        postContainer.appendChild(showCommentLink);
+      }
+
+      postContainer.appendChild(commentContainer);
+
 
       // Append the Post to the list of posts:
       document.querySelector('#postsView').append(postContainer);
     }
   })
+}
+
+function showComments(postId) {
+  let linkRoute = `/load_comments/${postId}`;
+  fetch(linkRoute)
+  .then(response => response.json())
+  .then(comments => {
+    console.log(comments);
+    for (comment of comments){
+      let commentText = document.createElement('div');
+      commentText.innerHTML = comment.commentText;
+      let commentAuthor = document.createElement('div');
+      commentAuthor.innerHTML = comment.commenter;
+      let commentBox = document.createElement('div');
+      commentBox.className = "commentBox";
+      commentBox.appendChild(commentText);
+      commentBox.appendChild(commentAuthor);
+      document.querySelector("#commentContainer" + postId).appendChild(commentBox);
+      document.querySelector("#commentContainer" + postId).style.display = "block";
+      document.querySelector("#showCommentLink" + postId).innerHTML = "Hide Comments";
+      document.querySelector("#showCommentLink" + postId).onclick = function(){
+        hideComments(postId);
+      }
+    }
+  })
+}
+function hideComments(postId) {
+  let commentCount =  document.querySelector("#numberOfComments" + postId).innerHTML;
+  document.querySelector("#commentContainer" + postId).style.display = "none";
+  document.querySelector("#commentContainer" + postId).innerHTML = "";
+  document.querySelector("#showCommentLink" + postId).innerHTML = "Show " + commentCount + " Comments";
+  document.querySelector("#showCommentLink" + postId).onclick = function(){
+    showComments(postId);
+  }
+}
+
+
+
+// Comment on a post:
+function commentPost(postId){
+  document.querySelector('#commentButton' + postId).innerHTML = "Save Comment";
+  document.querySelector('#commentField' + postId).value = "";
+  document.querySelector('#commentField' + postId).style.display = "block";
+  document.querySelector('#commentCancel' + postId).style.display = "block";
+  document.querySelector('#commentField' + postId).autofocus = true;
+
+  // Submit the comment:
+  document.querySelector('#commentButton' + postId).onclick = function() {
+    sendComment(postId);
+  }
+}
+function cancelComment(postId) {
+  document.querySelector('#commentField' + postId).style.display = "none";
+  document.querySelector('#commentButton' + postId).innerHTML = "Comment";
+  document.querySelector('#commentCancel' + postId).style.display = "none";
+  document.querySelector('#commentButton' + postId).onclick = function() {
+    commentPost(postId);
+  }
+}
+function sendComment(postId) {
+  let content = document.querySelector('#commentField' + postId).value;
+  //document.querySelector('#postContent' + postId).innerHTML = content;
+  let route = `/comment_post/${postId}`
+  fetch(route, {
+    method: 'POST',
+    body: JSON.stringify({
+      content: content
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Print result
+    let commentCount = data.numberOfComments;
+    document.querySelector('#commentField' + postId).style.display = "none";
+    document.querySelector('#commentField' + postId).value = "";      document.querySelector('#commentCancel' + postId).style.display = "none";
+    document.querySelector('#commentButton' + postId).innerHTML = "Comment";
+    document.querySelector('#commentButton' + postId).onclick = function() {
+      commentPost(postId);
+    };
+    document.querySelector("#showCommentLink" + postId).innerHTML = "Show " + commentCount + " Comments";
+    document.querySelector("#numberOfComments" + postId).innerHTML = commentCount;
+  });
 }
 
 // Edit a post:

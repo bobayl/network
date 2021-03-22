@@ -35,6 +35,35 @@ def create_post(request):
 
 @csrf_exempt
 @login_required
+def comment_post(request, post):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        comment = data.get("content")
+        post_to_comment = Post.objects.get(id = post)
+        commenter = request.user
+        newComment = Comment(post = post_to_comment, comment = comment, commenter = commenter)
+        newComment.save()
+        numberOfComments = Comment.objects.filter(post = post).count()
+        return JsonResponse({"numberOfComments": numberOfComments}, status=200)
+    else:
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+
+
+@login_required
+def load_comments(request, post):
+    if request.method == "GET":
+        comments = Comment.objects.filter(post = post)
+        comments = comments.order_by("-timestamp").all()
+        comments = [comment.serialize() for comment in comments]
+        return JsonResponse(comments, safe=False)
+    else:
+        return JsonResponse({"error": "GET request required."}, status=400)
+
+
+
+@csrf_exempt
+@login_required
 def update_post(request, post):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)

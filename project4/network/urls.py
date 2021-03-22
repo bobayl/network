@@ -19,5 +19,7 @@ urlpatterns = [
     path("followers/<str:username>", views.followers, name="followers"),
     path("likes/<int:post>", views.likes, name="likes"),
     path("update_paginator/<str:user>", views.update_paginator, name="update_paginator"),
-    path("update_post/<int:post>", views.update_post, name="update_post")
+    path("update_post/<int:post>", views.update_post, name="update_post"),
+    path("comment_post/<int:post>", views.comment_post, name="comment_post"),
+    path("load_comments/<int:post>", views.load_comments, name="load_comments")
 ]

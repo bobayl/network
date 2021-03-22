@@ -23,23 +23,32 @@ class Post(models.Model):
         return f"Post by {self.author} on {self.timestamp}"
 
     def serialize(self):
+        comments = Comment.objects.filter(post = self.id)
         return {
             "id": self.id,
             "content": self.content,
             "likes": [user.username for user in self.likes.all()],
             "timestamp": self.timestamp.strftime("%b %-d %Y, %-I:%M %p"),
-            "author": self.author.username}
+            "author": self.author.username,
+            "comments": comments.count()}
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete = models.CASCADE)
     comment = models.CharField(max_length = 500)
     commenter = models.ForeignKey(User, on_delete = models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add = True)
-    thumb_up = models.PositiveIntegerField(default = 0)
-    thumb_dn = models.PositiveIntegerField(default = 0)
 
     def __str__(self):
         return f"Comment by {self.commenter} on post {self.post.id}"
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "post": self.post.id,
+            "commentText": self.comment,
+            "commenter": self.commenter.username,
+            "timestamp": self.timestamp.strftime("%b %-d %Y, %-I:%M %p")
+        }
 
 class Follower(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)

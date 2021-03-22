@@ -14,7 +14,7 @@ span {
   margin-left: 10px;
 }
 
-#welcomeTitle {
+.welcomeTitle {
   text-align: center;
   margin-top: 50px;
   color: black;
@@ -41,13 +41,24 @@ span {
   margin-top: 10px;
 }
 
-#commentButton {
+.commentButton {
   height: 20px;
   margin-top: 5px;
   padding: 0px;
   font-size: small;
   padding-left: 5px;
   padding-right: 5px;
+}
+.showCommentLink {
+  font-size: small;
+  color: grey;
+
+}
+
+.commentBox {
+  background-color: lightgrey;
+  font-size: small;
+  margin-bottom: 3px;
 }
 
 .editLink, .cancelLink {
