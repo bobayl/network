@@ -84,6 +84,7 @@ function showFollowing(user){
   fetch(route)
   .then(response => response.json())
   .then(data => {
+    console.log(data);
     // Clear the Following View:
     document.querySelector('#followingView').innerHTML = "";
     // Create the Following title:
@@ -94,17 +95,25 @@ function showFollowing(user){
     let followings = data.following;
     // Loop over the followings to list all of them:
     for (following of followings) {
+      const followingUser = following;
       let followingContainer = document.createElement('div');
       followingContainer.id = "followingContainer"
-      let name = following;
-      followingContainer.innerHTML = name;
+      let followingUserLink = document.createElement('a');
+      followingUserLink.innerHTML = followingUser;
+
+      followingUserLink.onclick = function() {
+        show_user(followingUser);
+      };
+      followingUserLink.href = 'javascript:void(0)';
+      followingContainer.appendChild(followingUserLink);
+      //let name = following;
+      //followingContainer.innerHTML = name;
       document.querySelector('#followingView').append(followingContainer);
     }
 
     // Display all post of the guys the user is following:
     load_posts('following');
     document.querySelector('#postsView').style.display = 'block';
-
   })
 }
 
@@ -133,6 +142,7 @@ function show_user(username) {
       document.querySelector('#followButton').style.display = 'block';
     }
     document.querySelector('#userEmail').innerHTML = data.email;
+    document.querySelector('#userEmail').href = "mailto:" + data.email;
     // Load and display number of followers and following of the user:
     followers(username);
   })
@@ -374,7 +384,7 @@ function load_posts(user) {
         commentCancel.type = "button";
         commentCancel.innerHTML = "Cancel";
         commentCancel.className = "btn btn-outline-dark";
-        commentCancel.style = "height: 20px; padding: 0px; font-size: small; padding-left: 5px; padding-right: 5px";
+        commentCancel.style = "height: 20px; padding: 0px; font-size: small; padding-left: 5px; padding-right: 5px; margin-top: 3px; margin-bottom: 3px;";
         postContainer.appendChild(commentCancel);
         commentCancel.style.display = "none";
         commentCancel.onclick = function() {
@@ -382,15 +392,18 @@ function load_posts(user) {
         }
       }
 
-      // Create the comment link for each post in the bottom right of the post:
+      // Create the comments link for each post
       let commentContainer = document.createElement('div');
       commentContainer.id = "commentContainer" + postId;
+      let commentLinkContainer = document.createElement('div');
+      commentLinkContainer.className = "commentLinkContainer";
       if (post.comments > 0) {
         let numberOfComments = document.createElement('span');
         numberOfComments.id = "numberOfComments" + postId;
         numberOfComments.className = "showCommentLink";
         numberOfComments.innerHTML = post.comments;
         numberOfComments.style.display = "none";
+
         let showCommentLink = document.createElement('a');
         showCommentLink.id = "showCommentLink" + postId;
         showCommentLink.className = "showCommentLink";
@@ -399,8 +412,9 @@ function load_posts(user) {
         showCommentLink.onclick = function() {
           showComments(postId);
         }
-        postContainer.appendChild(showCommentLink);
-        postContainer.appendChild(numberOfComments);
+        commentLinkContainer.appendChild(showCommentLink);
+        commentLinkContainer.appendChild(numberOfComments);
+        postContainer.appendChild(commentLinkContainer);
       } else {
         let showCommentLink = document.createElement('a');
         showCommentLink.id = "showCommentLink" + postId;
@@ -408,7 +422,8 @@ function load_posts(user) {
         showCommentLink.innerHTML = "No comments to show";
         showCommentLink.href = 'javascript:void(0)';
         showCommentLink.disabled = true;
-        postContainer.appendChild(showCommentLink);
+        commentLinkContainer.appendChild(showCommentLink);
+        postContainer.appendChild(commentLinkContainer);
       }
 
       postContainer.appendChild(commentContainer);
@@ -420,6 +435,7 @@ function load_posts(user) {
   })
 }
 
+// Function to display the comments of a post:
 function showComments(postId) {
   let linkRoute = `/load_comments/${postId}`;
   fetch(linkRoute)
@@ -430,7 +446,8 @@ function showComments(postId) {
       let commentText = document.createElement('div');
       commentText.innerHTML = comment.commentText;
       let commentAuthor = document.createElement('div');
-      commentAuthor.innerHTML = comment.commenter;
+      commentAuthor.className = "commentAuthor";
+      commentAuthor.innerHTML = "Comment by: " + comment.commenter;
       let commentBox = document.createElement('div');
       commentBox.className = "commentBox";
       commentBox.appendChild(commentText);
@@ -444,6 +461,8 @@ function showComments(postId) {
     }
   })
 }
+
+// Function to hide the comments of a post if displayed:
 function hideComments(postId) {
   let commentCount =  document.querySelector("#numberOfComments" + postId).innerHTML;
   document.querySelector("#commentContainer" + postId).style.display = "none";
@@ -454,29 +473,47 @@ function hideComments(postId) {
   }
 }
 
-
-
 // Comment on a post:
 function commentPost(postId){
-  document.querySelector('#commentButton' + postId).innerHTML = "Save Comment";
-  document.querySelector('#commentField' + postId).value = "";
-  document.querySelector('#commentField' + postId).style.display = "block";
-  document.querySelector('#commentCancel' + postId).style.display = "block";
-  document.querySelector('#commentField' + postId).autofocus = true;
+  // Display the comment field and set it empty:
+  let newComment = document.querySelector('#commentField' + postId);
+  newComment.value = "";
+  newComment.style.display = "block";
+  newComment.autofocus = true;
 
-  // Submit the comment:
-  document.querySelector('#commentButton' + postId).onclick = function() {
+  // Change the text of the comment button and disable it:
+  let commentButton = document.querySelector('#commentButton' + postId);
+  commentButton.innerHTML = "Save Comment";
+  commentButton.disabled = true;
+  commentButton.onclick = function() {
     sendComment(postId);
   }
-}
-function cancelComment(postId) {
-  document.querySelector('#commentField' + postId).style.display = "none";
-  document.querySelector('#commentButton' + postId).innerHTML = "Comment";
-  document.querySelector('#commentCancel' + postId).style.display = "none";
-  document.querySelector('#commentButton' + postId).onclick = function() {
-    commentPost(postId);
+  // Display the cancel button:
+  let commentCancelButton = document.querySelector('#commentCancel' + postId)
+  commentCancelButton.style.display = "block";
+
+  // If text is entered in the comment field, enable the save comment button:
+  newComment.onkeyup = function(){
+    if (newComment.value.length > 0){
+      commentButton.disabled = false;
+    } else {
+      commentButton.disabled = true;
+    }
   }
 }
+
+// Function to cancel commenting:
+function cancelComment(postId) {
+  let commentButton = document.querySelector('#commentButton' + postId);
+  commentButton.innerHTML = "Comment";
+  commentButton.disabled = false;
+  commentButton.onclick = function() {
+    commentPost(postId);
+  }
+  document.querySelector('#commentCancel' + postId).style.display = "none";
+  document.querySelector('#commentField' + postId).style.display = "none";
+}
+
 function sendComment(postId) {
   let content = document.querySelector('#commentField' + postId).value;
   //document.querySelector('#postContent' + postId).innerHTML = content;

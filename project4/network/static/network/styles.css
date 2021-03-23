@@ -44,17 +44,29 @@ span {
 .commentButton {
   height: 20px;
   margin-top: 5px;
+  margin-right: 10px;
   padding: 0px;
   font-size: small;
   padding-left: 5px;
   padding-right: 5px;
 }
+.commentAuthor {
+  color: white;
+  background-color: lightgrey;
+  font-style: italic;
+  font-size: smaller;
+  text-align: right;
+}
+
+.commentLinkContainer {
+  background-color: white;
+  height: 20px;
+}
 .showCommentLink {
   font-size: small;
   color: grey;
-
+  float: right;
 }
-
 .commentBox {
   background-color: lightgrey;
   font-size: small;
