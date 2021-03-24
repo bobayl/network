@@ -84,7 +84,6 @@ function showFollowing(user){
   fetch(route)
   .then(response => response.json())
   .then(data => {
-    console.log(data);
     // Clear the Following View:
     document.querySelector('#followingView').innerHTML = "";
     // Create the Following title:
@@ -145,11 +144,12 @@ function show_user(username) {
     document.querySelector('#userEmail').href = "mailto:" + data.email;
     // Load and display number of followers and following of the user:
     followers(username);
+    followButton(username);
   })
 
   // Load and display all posts of that user
   load_posts(username);
-  followButton(username);
+  //followButton(username);
 }
 
 function followButton(username) {
@@ -184,15 +184,11 @@ function follow(user) {
   let route = `/follow/${user}`;
   //Fetch the route via GET request. This calls the "follow" function in views.py with a GET request.
   fetch(route);
-
-
 }
 function unfollow(user) {
   let route = `/unfollow/${user}`;
   //Fetch the route via GET request. This calls the "follow" function in views.py with a GET request.
   fetch(route);
-
-  //document.querySelector('#followButton').innerHTML = "Follow";
 }
 
 function update_paginator(user) {
@@ -286,44 +282,65 @@ function load_posts(user) {
       // Create the timestamp of the post:
       let timestamp = document.createElement('div');
       timestamp.id = 'postTimestamp';
+      let likeUnlike = document.createElement('span');
+      likeUnlike.id = 'likeUnlike';
+      likeUnlike.innerHTML = "";
       timestamp.innerHTML = post.timestamp;
       // Create the likes section of the post:
       let postLikes = document.createElement('div');
       postLikes.id = 'postLikes';
+      postLikes.onclick = function() {
+        // Add or remove the user to the likes list of the post
+        route = `/likes/${postId}`;
+        fetch(route)
+        .then(response => response.json())
+        .then(data => {
+          //console.log(data);
+          likes = Object.values(data.likes);
+          postLikes.innerHTML = "&#128154; " + likes.length;
+          if (likes.includes(user_name)) {
+            likeUnlike.innerHTML = "(unlike)";
+            postLikes.innerHTML = "&#128154;  liked " + likes.length +" times. "+ likeUnlike.innerHTML;
+            postLikes.onmouseover = function() {
+              this.style = "cursor: pointer;"
+              this.innerHTML = "&#128420;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
+            };
+            postLikes.onmouseout = function() {
+              this.innerHTML = "&#128154;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
+            };
+          } else {
+            likeUnlike.innerHTML = "(like)";
+            postLikes.innerHTML = "&#128154;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
+            postLikes.onmouseover = function() {
+              this.innerHTML = "&#10084;&#65039;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
+              this.style = "cursor: pointer;"
+            }
+            postLikes.onmouseout = function() {
+              this.innerHTML = "&#128154;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
+            }
+          }
+        })
+      }
       // Check if the post is already liked by the user:
       if (likes.includes(user_name)) {
-        postLikes.innerHTML = "&#128154; " + likes.length;
-        postLikes.style = "opacity: 0.5;"
+        likeUnlike.innerHTML = "(unlike)";
+        postLikes.innerHTML = "&#128154;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
         postLikes.onmouseover = function() {
-          this.style = "cursor: pointer; opacity: 0.5;"
-        }
+          this.style = "cursor: pointer;"
+          this.innerHTML = "&#128420;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
+        };
+        postLikes.onmouseout = function() {
+          this.innerHTML = "&#128154;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
+        };
       } else {
-        postLikes.innerHTML = "&#128154; " + likes.length;
+        likeUnlike.innerHTML = "(like)";
+        postLikes.innerHTML = "&#128154;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
         postLikes.onmouseover = function() {
-          this.innerHTML = "&#128153; " + likes.length;
+          this.innerHTML = "&#10084;&#65039;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
           this.style = "cursor: pointer;"
         }
         postLikes.onmouseout = function() {
-          this.innerHTML = "&#128154; " + likes.length;
-        }
-        postLikes.onclick = function() {
-          if (!likes.includes(user_name)){
-            // Add the user to the likes list of the post
-            route = `/likes/${postId}`;
-            fetch(route)
-            .then(response => response.json())
-            .then(data => {
-              likes = Object.values(data.likes);
-              postLikes.innerHTML = "&#128154; " + likes.length;
-              postLikes.style = "opacity: 0.5;"
-              postLikes.onmouseover = function() {
-                this.style = "cursor: pointer; opacity: 0.5;"
-              }
-              postLikes.onmouseout = function() {
-                postLikes.style = "opacity: 0.5;"
-              }
-            })
-          }
+          this.innerHTML = "&#128154;   liked " + likes.length +" times. " + likeUnlike.innerHTML;
         }
       }
 
@@ -425,9 +442,7 @@ function load_posts(user) {
         commentLinkContainer.appendChild(showCommentLink);
         postContainer.appendChild(commentLinkContainer);
       }
-
       postContainer.appendChild(commentContainer);
-
 
       // Append the Post to the list of posts:
       document.querySelector('#postsView').append(postContainer);
@@ -441,7 +456,6 @@ function showComments(postId) {
   fetch(linkRoute)
   .then(response => response.json())
   .then(comments => {
-    console.log(comments);
     for (comment of comments){
       let commentText = document.createElement('div');
       commentText.innerHTML = comment.commentText;
@@ -536,6 +550,7 @@ function sendComment(postId) {
     };
     document.querySelector("#showCommentLink" + postId).innerHTML = "Show " + commentCount + " Comments";
     document.querySelector("#numberOfComments" + postId).innerHTML = commentCount;
+    //showComments(postId);
   });
 }
 

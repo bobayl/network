@@ -71,6 +71,8 @@ span {
   background-color: lightgrey;
   font-size: small;
   margin-bottom: 3px;
+  padding: 5px;
+  border-radius: 3px;
 }
 
 .editLink, .cancelLink {
@@ -100,6 +102,12 @@ span {
   font-size: small;
   font-style: italic;
   margin-top: 10px;
+}
+
+#postLikes {
+  font-size: small;
+  font-style: italic;
+  color: red;
 }
 
 #followingContainer, #followerContainer {

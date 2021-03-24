@@ -78,8 +78,14 @@ def update_post(request, post):
 @login_required
 def likes(request, post):
     user = request.user
+    print(user)
     post = Post.objects.get(pk = post)
-    post.likes.add(user)
+    print(post)
+    print(f"postlikes: {post.likes.all()}")
+    if user in post.likes.all():
+        post.likes.remove(user)
+    else:
+        post.likes.add(user)
     post.save()
     post = post.serialize()
     return JsonResponse(post, safe = False)
@@ -90,7 +96,6 @@ def update_paginator(request, user):
     numberOfPosts = 0
     numberOfPages = 0
     # Filter posts depending on which posts to show.
-    print("in here update_paginator")
     if user == "all":
         posts = Post.objects.all()
     elif user == "following":
@@ -104,13 +109,11 @@ def update_paginator(request, user):
         posts = Post.objects.filter(author = thisUser)
 
     numberOfPosts = posts.count()
-    print(f'numberOfPosts: {numberOfPosts}')
     lastPage = numberOfPosts%numberOfPostsPerPage
     if lastPage == 0:
         numberOfPages = int(numberOfPosts/numberOfPostsPerPage)
     else:
         numberOfPages = int(numberOfPosts/numberOfPostsPerPage) + 1
-    print(f'numberOfPages: {numberOfPages}')
     mydata = {"numberOfPages": numberOfPages}
     return JsonResponse(mydata)
 
@@ -119,10 +122,8 @@ def update_paginator(request, user):
 # Loading posts:
 @login_required
 def posts(request, user):
-    print(f"posts() called on {user}")
     # For pagination: Extract the page number requested from the GET request.
     pageNumber = int(request.GET.get("page") or 1)
-    print(pageNumber)
 
     # Filter posts depending on which posts to show.
     if user == "all":
