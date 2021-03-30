@@ -44,6 +44,7 @@ def comment_post(request, post):
         newComment = Comment(post = post_to_comment, comment = comment, commenter = commenter)
         newComment.save()
         numberOfComments = Comment.objects.filter(post = post).count()
+        print(f"numberOfComments {numberOfComments}")
         return JsonResponse({"numberOfComments": numberOfComments}, status=200)
     else:
         return JsonResponse({"error": "POST request required."}, status=400)
