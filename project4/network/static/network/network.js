@@ -120,7 +120,7 @@ function showFollowing(user){
 function show_user(username) {
   // Display and hid the relevant blocks:
   document.querySelector('#createPostView').style.display = 'none';
-  document.querySelector('#followButton').style.display = 'none';
+  document.querySelector('#followButton').style.display = 'block';
   document.querySelector('#followingView').style.display = 'none';
   document.querySelector('#userView').style.display = 'block';
   document.querySelector('#postsView').style.display = 'block';
@@ -136,8 +136,8 @@ function show_user(username) {
     // Display the follow button:
     const currentUser = JSON.parse(document.getElementById('user_name').textContent);
     // Show or not show the follow-button:
-    if (data.username != currentUser) {
-      document.querySelector('#followButton').style.display = 'block';
+    if (data.username == currentUser) {
+      document.querySelector('#followButton').style.display = 'none';
     }
     document.querySelector('#userEmail').innerHTML = data.email;
     document.querySelector('#userEmail').href = "mailto:" + data.email;

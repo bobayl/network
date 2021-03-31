@@ -72,9 +72,14 @@ def update_post(request, post):
     data = json.loads(request.body)
     content = data.get("content")
     post_to_edit = Post.objects.get(id = post)
-    post_to_edit.content = content
-    post_to_edit.save()
-    return JsonResponse({"new text": content}, status=200)
+    author = post_to_edit.author
+
+    if request.user != author:
+        return JsonResponse({"error": "You are not the author of this post."}, status=400)
+    else:
+        post_to_edit.content = content
+        post_to_edit.save()
+        return JsonResponse({"new text": content}, status=200)
 
 @login_required
 def likes(request, post):

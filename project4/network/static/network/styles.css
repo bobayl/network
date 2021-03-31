@@ -31,23 +31,6 @@
     }
 }
 
-@keyframes shrink {
-    0% {
-      opacity: 1;
-      display: block;
-    }
-
-    75% {
-      opacity: 0;
-      display: block;
-    }
-
-    100% {
-      opacity: 0;
-      display: none;
-    }
-}
-
 #lastCommentBox {
   animation-name: growComment;
   animation-duration: 2s;
